@@ -1,40 +1,3 @@
-let weather = {
-  "paris": {
-    temp: 19.7,
-    humidity: 80
-  },
-  "tokyo": {
-    temp: 17.3,
-    humidity: 50
-  },
-  "lisbon": {
-    temp: 30.2,
-    humidity: 20
-  },
-  "san francisco": {
-    temp: 20.9,
-    humidity: 100
-  },
-  "moscow": {
-    temp: -5,
-    humidity: 20
-  }};
-
-  let place = prompt("Enter A City?");
-    
-     if (weather[place]) {
-     let temperature = weather[place].temp;
-    let humidity = weather[place].humidity;
-      let celsiusTemperature = Math.round(temperature);
-      let fahrenheitTemperature = Math.round((temperature * 9) / 5 + 32);
-   
-      alert(
-       ` It is currently ${celsiusTemperature}°C (${fahrenheitTemperature}°F) in ${place} with a humidity of ${humidity}%`);
-        }else{
-          alert(
-         `Sorry we don't know the weather for this city, try going to https://www.google.com/search?q=weather+{place}`
-        )}
-            
 function formatDate(date) {
   let hours = date.getHours();
   if (hours < 10) {
@@ -64,7 +27,10 @@ function searchCity(city) {
   let apiKey = "5f472b7acba333cd8a035ea85a0d4d4c";
   let apiUrl = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric`;
   axios.get(apiUrl).then(showWeather);
+   apiUrl = `https://api.openweathermap.org/data/2.5/forecast?q=${city}&appid=${apiKey}&units=metric`;
+  axios.get(apiUrl).then(dispalyForecast);
 }
+
 function handleSubmit(event) {
   event.preventDefault();
   let city = document.querySelector("#city-input").value;
@@ -84,7 +50,7 @@ searchForm.addEventListener("submit", handleSubmit);
 function showWeather(response) {
   let h1 = document.querySelector("h1");
   let temperature = Math.round(response.data.main.temp);
-  h1.innerHTML = `It is currently ${temperature}° in ${response.data.name}`;
+  h1.innerHTML = `It is currently ${temperature}°C in ${response.data.name}`;
   console.log(temperature)
   console.log(response)
 }
@@ -99,3 +65,53 @@ function retrievePosition(position) {
 }
 
 navigator.geolocation.getCurrentPosition(retrievePosition); 
+
+function displayTemperature(response) {
+  let temperatureElement = document.querySelector("#temperature");
+  let cityElement = document.querySelector("#city");
+  let descriptionElement = document.querySelector("#description");
+  let humidityElement = document.querySelector("#humidity");
+  let windElement = document.querySelector("#wind");
+  let dateElement = document.querySelector("#date");
+  let iconElement = document.querySelector("#icon");
+
+  celTemp = response.data.main.temp;
+  
+  temperatureElement.innerHTML = Math.round(celsiusTemperature);
+  cityElement.innerHTML = response.data.name;
+  descriptionElement.innerHTML = response.data.weather[0].description;
+  humidityElement.innerHTML = response.data.main.humidity;
+  windElement.innerHTML = Math.round(response.data.wind.speed);
+  dateElement.innerHTML = formatDate(response.data.dt * 1000);
+  iconElement.setAttribute(
+    "src",
+    `http://openweathermap.org/img/wn/${response.data.weather[0].icon}@2x.png`
+  );
+  iconElement.setAttribute("alt", response.data.weather[0].description);
+}
+
+
+
+function dispFahr(event){
+  event.preventDefault();
+  let temperatureElement = document.querySelector("#temperature");
+  celLink.classList.remove("active");
+  fahrLink.classList.add("active");
+  let fahrTemp = (celTemp * 9) / 5 + 32;
+  temperatureElement.innerHTML = Math.round(fahrTemp);
+}      
+function dispCel(event){
+  event.preventDefault();
+  celLink.classList.add("active");
+  fahrLink.classList.remove("active");
+  let temperatureElement = document.querySelector("#temperature");
+  temperatureElement.innerHTML = Math.round(celTemp);
+}
+let fahrLink = document.querySelector("#fahrenheit-link");
+fahrLink.addEventListener("click", dispFahr);
+
+let celLink = document.querySelector("#celsius-link");
+celLink.addEventListener("click", dispCel);
+
+let celTemp = null;
+
